@@ -7,7 +7,7 @@
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=cbbd27594afd089daa160d3a16dd515a"
 
-SRC_URI = "https://github.com/ament/gmock_vendor/archive/${PV}.tar.gz"
+SRC_URI = "https://github.com/ament/gmock_vendor/archive/${PV}.tar.gz";downloadfilename=ros2_${PN}_${PV}.tar.gz"
 SRC_URI[md5sum] = "a0c0d1420039d13ad7f94a2cea67dbc2"
 SRC_URI[sha256sum] = "169ba5cf3eb220ff74f3588acfb7f7c16484967fde6dee4ee4f3c44ad06303ba"
 
