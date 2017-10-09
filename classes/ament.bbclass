@@ -1,43 +1,54 @@
-ament_do_compile() {
-  if [ ! -f ${ros2_dir}/setup.sh ]; then
-    echo "File not found!"
-    mkdir -p ${ros2_dir}
-    touch ${ros2_dir}/setup.sh
-  fi
+DEPENDS_append = " \
+    ament-tools-native \
+    ament-cmake-native \
+    ament-cmake-export-definitions-native \
+    ament-cmake-export-dependencies-native \
+    ament-cmake-export-include-directories-native \
+    ament-cmake-export-interfaces-native \
+    ament-cmake-export-libraries-native \
+    ament-cmake-export-link-flags-native \
+    ament-cmake-libraries-native \
+    ament-cmake-python-native \
+    ament-cmake-target-dependencies-native \
+    ament-cmake-include-directories-native \
+    ament-cmake-test-native \
+"
 
-  . ${ros2_dir}/setup.sh
+ROS_BPN ?= "${@d.getVar('BPN', True).replace('-', '_')}"
 
-  ament build . --install-space ${ros2_dir} --force-cmake-configure --cmake-args \
-  -DCMAKE_LIBRARY_PATH=${STAGING_DIR_HOST}/usr/lib/ \
-  -DCMAKE_INSTALL_INCLUDEDIR=${STAGING_DIR_HOST}/usr/include/ \
-  -DCMAKE_LINKER=${STAGING_BINDIR_NATIVE}/arm-poky-linux-gnueabi/arm-poky-linux-gnueabi-ld.bfd \
-  -DCMAKE_CROSSCOMPILING=1 -DCOMPILE_EXAMPLES=OFF \
-  -DEIGEN3_INCLUDE_DIR=${BASE_WORKDIR}/${MULTIMACH_HOST_SYS}/libeigen/3.2.8-r0/image/usr/include/eigen3 \
-  -DCMAKE_PREFIX_PATH=${STAGING_DIR_HOST} \
-  -DPoco_LIBRARY_DIR=${STAGING_DIR_HOST}/usr/lib/ \
-  -DPoco_INCLUDE_DIR=${STAGING_DIR_HOST}/usr/include/ \
-  -Dfastcdr_LIBRARY_DIR=${STAGING_DIR_HOST}/usr/include/fastcdr/ \
-  -DTINYXML2_SOURCE_DIR=${BASE_WORKDIR}/${MULTIMACH_HOST_SYS}/tinyxml2/4.0.1-r0/git \
-  -DPYTHON_INCLUDE_DIR=${STAGING_DIR_HOST}/usr/include/python3.5m \
-  -DPYTHON_LIBRARY=${STAGING_DIR_HOST}/usr/lib/libpython3.5m.so \
-  -DEigen3_INCLUDE_DIR=${STAGING_DIR_HOST}/usr/include/eigen3/ \
-  -DOpenCV_DIR=${STAGING_DIR_HOST}/usr/share/OpenCV/ \
-  -D_GLIBCXX_USE_CXX11_ABI=0 \
-  -Wno-dev 
+S = "${WORKDIR}/git/${ROS_BPN}"
+
+EXTRA_OECMAKE_append = " -DBUILD_TESTING=OFF"
+export AMENT_PREFIX_PATH="${STAGING_DIR_HOST}${prefix};${STAGING_DIR_NATIVE}${prefix}"
+
+inherit cmake python3native
+
+do_install_append() {
+    rm -rf ${D}${datadir}/${ROS_BPN}/environment
+    rm -f ${D}${datadir}/${ROS_BPN}/local_setup.bash
+    rm -f ${D}${datadir}/${ROS_BPN}/local_setup.sh
+    rm -f ${D}${datadir}/${ROS_BPN}/local_setup.zsh
+    rm -f ${D}${prefix}/local_setup.bash
+    rm -f ${D}${prefix}/local_setup.sh
+    rm -f ${D}${prefix}/local_setup.zsh
+    rm -f ${D}${prefix}/setup.bash
+    rm -f ${D}${prefix}/setup.sh
+    rm -f ${D}${prefix}/setup.zsh
+    rm -f ${D}${prefix}/_order_packages.py
 }
 
+FILES_${PN} = " \
+    ${datadir}/${ROS_BPN}/package.xml \
+    ${datadir}/${ROS_BPN}/resource/* \
+    ${datadir}/ament_index/* \
+    ${libdir}/${PYTHON_DIR}/* \
+    ${libdir}/${ROS_BPN}/* \
+    ${libdir}/lib*.so \
+"
 
-ament_do_install () {
-#	install -d ${D}/opt/ros2/
-#	cp -r ${S}/install/* ${D}/opt/ros2/
-  :
-}
-base_prefix = "${STAGING_DIR_NATIVE}"
-ros2_dir = "${STAGING_DIR_HOST}/opt/ros2"
-
-FILES_${PN} += "\
-    ${ros2_dir} \
-    "
-
-EXPORT_FUNCTIONS do_compile do_install
-ALLOW_EMPTY_${PN} = "1"
+FILES_${PN}-dev = " \
+    ${datadir}/${ROS_BPN}/cmake/* \
+    ${datadir}/${ROS_BPN}/msg/* \
+    ${datadir}/${ROS_BPN}/srv/* \
+    ${includedir} \
+"
